@@ -22,9 +22,16 @@ car_img = pygame.transform.scale(car_img, (90, 60))
 #coin picture
 coin_img = pygame.image.load("assets/goldcoin.png").convert_alpha()
 coin_img = pygame.transform.scale(coin_img, (40, 40))
+#tree picture
+tree_img = pygame.image.load("assets/tree.png").convert_alpha()
+tree_img = pygame.transform.scale(tree_img, (60, 60))
 
 #music
+#coin sound
 coin_sound = pygame.mixer.Sound("assets/coinsound.mp3")
+#driving sound
+pygame.mixer.music.load("assets/drivingsound.mp3")
+pygame.mixer.music.set_volume(0.4)
 
 # starting x position of car
 car_x = 150
@@ -46,6 +53,9 @@ coin_y = lanes[coin_lane]
 time_limit = 60
 start_time = 0
 time_left = time_limit
+
+#tree position
+tree_x = 800
 
 # controls what screen is shown
 game_state = "start"
@@ -97,26 +107,30 @@ def draw_game():
     screen.fill((157, 193, 183))
 
     # race track
-    pygame.draw.rect(screen, (100, 100, 100),
-                     (50, 50, 700, 500))
+    pygame.draw.rect(screen, (60, 60, 60), (0, 100, 800, 400))
 
     # lane divider lines
-    pygame.draw.line(screen, (255, 255, 255),
-                     (50, 175), (750, 175), 3)
-
-    pygame.draw.line(screen, (255, 255, 255),
-                     (50, 275), (750, 275), 3)
-
-    pygame.draw.line(screen, (255, 255, 255),
-                     (50, 375), (750, 375), 3)
+    pygame.draw.line(screen, (255, 255, 255), (0, 200), (800, 200), 3)
+    pygame.draw.line(screen, (255, 255, 255), (0, 300), (800, 300), 3)
+    pygame.draw.line(screen, (255, 255, 255), (0, 400), (800, 400), 3)
 
     # player car
     screen.blit(car_img, (car_x, car_y))
 
     # collectible coin
-    screen.blit(coin_img, (coin_x, coin_y))
+    screen.blit(coin_img, (coin_x, coin_y + 10))
+
+    #tree
+    for x in range(50, 751, 150):
+        screen.blit(tree_img, (x, 20))
+        screen.blit(tree_img, (x, 520))
 
     # displays score
+    #score box
+    pygame.draw.rect(screen, (30, 30, 30), (60, 50, 140, 40))
+    #timer box
+    pygame.draw.rect(screen, (30, 30, 30), (590, 50, 140, 40))
+
     score_text = small_font.render(
         f"Score: {score}",
         True,
@@ -210,6 +224,7 @@ while running:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
                     reset_game()
+                    pygame.mixer.music.play(-1)
                     game_state = "playing"
 
         # gameplay controls
@@ -243,6 +258,11 @@ while running:
     # only runs game logic during gameplay
     if game_state == "playing":
 
+        #show the tree
+        tree_x -= 5
+        if tree_x < -60:
+            tree_x = 800
+
         # updates car y position
         car_y = lanes[current_lane]
 
@@ -250,8 +270,8 @@ while running:
         if car_x < 50:
             car_x = 50
 
-        if car_x > 700:
-            car_x = 700
+        if car_x > 750 - 90:
+            car_x = 750 - 90
 
         # moves coin across screen
         coin_x -= 10
@@ -264,8 +284,7 @@ while running:
 
         # hitboxes for collision detection
         car_rect = pygame.Rect(car_x, car_y, 90, 60)
-        coin_rect = pygame.Rect(coin_x - 12, coin_y, 24, 24
-        )
+        coin_rect = pygame.Rect(coin_x - 12, coin_y, 40, 40)
 
         # checks if car collected coin
         if car_rect.colliderect(coin_rect):
@@ -277,23 +296,20 @@ while running:
             coin_y = lanes[coin_lane]
 
         # calculates elapsed time
-        elapsed_time = (
-            pygame.time.get_ticks()
-            - start_time
-        ) / 1000
+        elapsed_time = (pygame.time.get_ticks() - start_time) / 1000
 
         # updates countdown timer
-        time_left = max(
-            0,
-            int(time_limit - elapsed_time)
-        )
+        time_left = max(0, int(time_limit - elapsed_time))
 
-        # checks win condition
+        # if you win
         if score >= 20:
+            pygame.mixer.music.stop()
             game_state = "win"
+            
 
-        # checks lose condition
+        # if you lose
         if time_left <= 0:
+            pygame.mixer.music.stop()
             game_state = "game_over"
 
     # draws correct screen
