@@ -12,13 +12,17 @@ pygame.display.set_caption("Road Rush")
 clock = pygame.time.Clock()
 
 # fonts for text on screen
-font = pygame.font.SysFont(None, 50)
+title_font = pygame.font.Font("assets/HighSpeed.otf", 50)
 small_font = pygame.font.SysFont(None, 36)
 
 #images
 #car picture
 car_img = pygame.image.load("assets/whitecar.png").convert_alpha()
 car_img = pygame.transform.scale(car_img, (90, 60))
+menu_car_x = -100
+menu_car_img = pygame.transform.scale(car_img, (60, 40))
+
+
 #coin picture
 coin_img = pygame.image.load("assets/goldcoin.png").convert_alpha()
 coin_img = pygame.transform.scale(coin_img, (40, 40))
@@ -54,9 +58,6 @@ time_limit = 60
 start_time = 0
 time_left = time_limit
 
-#tree position
-tree_x = 800
-
 # controls what screen is shown
 game_state = "start"
 
@@ -66,7 +67,7 @@ def reset_game():
     global car_x, current_lane, car_y
     global coin_x, coin_lane, coin_y
     global score, start_time, time_left
-
+    
     # reset car position
     car_x = 150
     current_lane = 1
@@ -86,19 +87,53 @@ def reset_game():
 # draws the start screen
 def draw_start_screen():
     # background color
-    screen.fill((157, 193, 183))
+    screen.fill((192, 192, 192))
+    
 
     # game title
-    title = font.render("ROAD RUSH", True, (0, 0, 0))
-    screen.blit(title, (270, 120))
+    title = title_font.render("ROAD RUSH", True, (255, 255, 255))
+    pygame.draw.rect(screen, (180, 0, 0), (150, 75, 500, 90))
+
+    pygame.draw.polygon(screen, (180, 0, 0),
+                    [(150, 75), (110, 120), (150, 165)])
+
+    pygame.draw.polygon(screen, (180, 0, 0),
+                    [(650, 75), (690, 120), (650, 165)])
+
+    screen.blit(title, title.get_rect(center=(400, 120)))
 
     # instructions to start game
-    text = small_font.render(
-        "Press ENTER to Start",
-        True,
-        (0, 0, 0)
-    )
-    screen.blit(text, (270, 250))
+    text1 = small_font.render("Use ARROW KEYS or WASD to move", True, (0, 0, 0))
+    text2 = small_font.render("Collect 20 coins before time runs out", True, (0, 0, 0))
+    text3 = small_font.render("Avoid tires and oil spills", True, (0, 0, 0))
+    #making the "enter" text white
+    p1 = small_font.render("Press ", True, (0, 0, 0))
+    p2 = small_font.render("ENTER", True, (255, 255, 255))
+    p3 = small_font.render(" to Start", True, (0, 0, 0))
+
+    total_width = p1.get_width() + p2.get_width() + p3.get_width()
+    x = 400 - total_width // 2
+
+    screen.blit(p1, (x, 370))
+    screen.blit(p2, (x + p1.get_width(), 370))
+    screen.blit(p3, (x + p1.get_width() + p2.get_width(), 370))
+
+    screen.blit(text1, text1.get_rect(center=(400, 250)))
+    screen.blit(text2, text2.get_rect(center=(400, 290)))
+    screen.blit(text3, text3.get_rect(center=(400, 330)))
+    
+    #road for little car on the home screen
+    pygame.draw.rect(screen, (60, 60, 60), (0, 500, 800, 40))
+    for x in range(0, 800, 50):
+        pygame.draw.rect(screen, (255, 255, 255), (x, 518, 25, 4))
+    screen.blit(menu_car_img, (menu_car_x, 485))
+
+    #coins design on the homescreen
+    menu_coin = pygame.transform.scale(coin_img, (100, 60))
+    screen.blit(menu_coin, (60, 250))
+    screen.blit(menu_coin, (640, 250))
+
+
 
 
 # draws the main gameplay screen
@@ -153,12 +188,9 @@ def draw_game_over():
     screen.fill((200, 100, 100))
 
     # game over title
-    game_over = font.render(
-        "GAME OVER",
-        True,
-        (0, 0, 0)
-    )
-    screen.blit(game_over, (270, 150))
+    game_over = title_font.render("GAME OVER", True, (0, 0, 0))
+    screen.blit(game_over, game_over.get_rect(center=(400, 120)))
+
 
     # final score text
     score_text = small_font.render(
@@ -183,19 +215,11 @@ def draw_win_screen():
     screen.fill((100, 200, 100))
 
     # win message
-    win = font.render(
-        "YOU WIN!",
-        True,
-        (0, 0, 0)
-    )
-    screen.blit(win, (300, 150))
+    win = title_font.render("YOU WIN!", True, (0, 0, 0))
+    screen.blit(win, win.get_rect(center=(400, 120)))
 
     # final score text
-    score_text = small_font.render(
-        f"Final Score: {score}",
-        True,
-        (0, 0, 0)
-    )
+    score_text = small_font.render(f"Final Score: {score}", True, (0, 0, 0))
     screen.blit(score_text, (300, 230))
 
     # restart instructions
@@ -211,6 +235,14 @@ def draw_win_screen():
 running = True
 
 while running:
+    #road for mini car in the homescreen
+    
+    # little car on the home screen
+    if game_state == "start":
+                menu_car_x += 5
+                if menu_car_x > 900:
+                    menu_car_x = -100
+
 
     # checks for events
     for event in pygame.event.get():
@@ -257,11 +289,6 @@ while running:
 
     # only runs game logic during gameplay
     if game_state == "playing":
-
-        #show the tree
-        tree_x -= 5
-        if tree_x < -60:
-            tree_x = 800
 
         # updates car y position
         car_y = lanes[current_lane]
