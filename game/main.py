@@ -26,9 +26,18 @@ menu_car_img = pygame.transform.scale(car_img, (60, 40))
 #coin picture
 coin_img = pygame.image.load("assets/goldcoin.png").convert_alpha()
 coin_img = pygame.transform.scale(coin_img, (40, 40))
+
 #tree picture
 tree_img = pygame.image.load("assets/tree.png").convert_alpha()
 tree_img = pygame.transform.scale(tree_img, (60, 60))
+
+#tire picture
+tire_img = pygame.image.load("assets/tire.png").convert_alpha()
+tire_img = pygame.transform.scale(tire_img, (50, 50))
+
+#oil picture
+oil_img = pygame.image.load("assets/oil.png").convert_alpha()
+oil_img = pygame.transform.scale(oil_img, (50, 50))
 
 #music
 #coin sound
@@ -53,6 +62,15 @@ score = 0
 coin_lane = random.randint(0, 3)
 coin_y = lanes[coin_lane]
 
+#oil and tire setting
+tire_x = 1000
+tire_lane = random.randint(0, 3)
+tire_y = lanes[tire_lane]
+
+oil_x = 1400
+oil_lane = random.randint(0, 3)
+oil_y = lanes[oil_lane]
+
 # timer settings
 time_limit = 60
 start_time = 0
@@ -70,6 +88,8 @@ def reset_game():
     global car_x, current_lane, car_y
     global coin_x, coin_lane, coin_y
     global score, start_time, time_left
+    global tire_x, tire_lane, tire_y
+    global oil_x, oil_lane, oil_y
     
     # reset car position
     car_x = 150
@@ -85,6 +105,15 @@ def reset_game():
     score = 0
     start_time = pygame.time.get_ticks()
     time_left = time_limit
+
+    #reset obstacles (tires and oil)
+    tire_x = 1000
+    tire_lane = random.randint(0, 3)
+    tire_y = lanes[tire_lane]
+
+    oil_x = 1400
+    oil_lane = random.randint(0, 3)
+    oil_y = lanes[oil_lane]
 
 
 # draws the start screen
@@ -165,6 +194,10 @@ def draw_game():
 
     # collectible coin
     screen.blit(coin_img, (coin_x, coin_y + 10))
+
+    #oil and tire
+    screen.blit(tire_img, (tire_x, tire_y))
+    screen.blit(oil_img, (oil_x, oil_y))
 
     #tree
     for x in range(50, 751, 150):
@@ -372,6 +405,40 @@ while running:
             coin_x = 800
             coin_lane = random.randint(0, 3)
             coin_y = lanes[coin_lane]
+        
+        #move obstacles
+        #tire
+        tire_x -= 12
+
+        if tire_x < -50:
+            tire_x = random.randint(900, 1300)
+            tire_lane = random.randint(0, 3)
+            tire_y = lanes[tire_lane]
+
+        #oil
+        oil_x -= 10
+
+        if oil_x < -50:
+            oil_x = random.randint(1200, 1700)
+            oil_lane = random.randint(0, 3)
+            oil_y = lanes[oil_lane]
+
+        #obstacle hitbox 
+        tire_rect = pygame.Rect(tire_x, tire_y, 50, 50)
+        oil_rect = pygame.Rect(oil_x, oil_y, 50, 50)
+
+       #obstacle collision
+        if car_rect.colliderect(tire_rect):
+            score = max(0, score - 1)
+            tire_x = random.randint(900, 1300)
+            tire_lane = random.randint(0, 3)
+            tire_y = lanes[tire_lane]
+
+        if car_rect.colliderect(oil_rect):
+            score = max(0, score - 1)
+            oil_x = random.randint(1200, 1700)
+            oil_lane = random.randint(0, 3)
+            oil_y = lanes[oil_lane]
 
         # calculates elapsed time
         elapsed_time = (pygame.time.get_ticks() - start_time) / 1000
