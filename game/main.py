@@ -171,6 +171,12 @@ def draw_game():
         screen.blit(tree_img, (x, 20))
         screen.blit(tree_img, (x, 520))
 
+    #traffic light
+    pygame.draw.rect(screen, (30, 30, 30), (320, 30, 160, 50), border_radius=10)
+    pygame.draw.circle(screen, (100, 0, 0), (350, 55), 15)
+    pygame.draw.circle(screen, (100, 100, 0), (400, 55), 15)
+    pygame.draw.circle(screen, (0, 255, 0), (450, 55), 15)
+
     # displays score
     #score box
     pygame.draw.rect(screen, (30, 30, 30), (60, 50, 140, 40))
