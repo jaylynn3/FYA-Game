@@ -45,6 +45,10 @@ coin_sound = pygame.mixer.Sound("assets/coinsound.mp3")
 #driving sound
 pygame.mixer.music.load("assets/drivingsound.mp3")
 pygame.mixer.music.set_volume(0.4)
+#background music
+background_music = pygame.mixer.Sound("assets/backgroundmusic.mp3")
+background_music.set_volume(0.3)
+background_music.play(-1)
 
 # starting x position of car
 car_x = 150
