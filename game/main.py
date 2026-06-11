@@ -58,6 +58,9 @@ time_limit = 60
 start_time = 0
 time_left = time_limit
 
+#high score times list
+best_times = []
+
 # controls what screen is shown
 game_state = "start"
 
@@ -139,15 +142,23 @@ def draw_start_screen():
 # draws the main gameplay screen
 def draw_game():
     # background color
-    screen.fill((157, 193, 183))
+    screen.fill((46, 139, 87))
 
     # race track
     pygame.draw.rect(screen, (60, 60, 60), (0, 100, 800, 400))
 
     # lane divider lines
-    pygame.draw.line(screen, (255, 255, 255), (0, 200), (800, 200), 3)
-    pygame.draw.line(screen, (255, 255, 255), (0, 300), (800, 300), 3)
-    pygame.draw.line(screen, (255, 255, 255), (0, 400), (800, 400), 3)
+    #border line
+    pygame.draw.line(screen, (255, 255, 255), (0, 100), (800, 100), 3)
+    #dotted lines
+    for x in range(0, 800, 50):
+        pygame.draw.rect(screen, (255, 255, 255), (x, 198, 25, 4))
+    for x in range(0, 800, 50):
+        pygame.draw.rect(screen, (255, 255, 255), (x, 298, 25, 4))
+    for x in range(0, 800, 50):
+        pygame.draw.rect(screen, (255, 255, 255), (x, 398, 25, 4))
+    #border line
+    pygame.draw.line(screen, (255, 255, 255), (0, 500), (800, 500), 3)
 
     # player car
     screen.blit(car_img, (car_x, car_y))
@@ -206,7 +217,19 @@ def draw_game_over():
         True,
         (0, 0, 0)
     )
-    screen.blit(restart, (280, 300))
+    screen.blit(restart, restart.get_rect(center=(400, 280)))
+
+    #Leaderboard box
+    pygame.draw.rect(screen, (255, 255, 255), (250, 360, 300, 220))
+    pygame.draw.rect(screen, (0, 0, 0), (250, 360, 300, 220), 3)
+    
+    #leaderboard content
+    title = small_font.render("Best Times:", True, (0, 0, 0))
+    screen.blit(title, title.get_rect(center=(400, 350)))
+
+    for i, t in enumerate(best_times):
+        text = small_font.render(f"{i+1}. {t}s", True, (0, 0, 0))
+        screen.blit(text, (330, 390 + i * 30))
 
 
 # draws the win screen
@@ -219,8 +242,9 @@ def draw_win_screen():
     screen.blit(win, win.get_rect(center=(400, 120)))
 
     # final score text
-    score_text = small_font.render(f"Final Score: {score}", True, (0, 0, 0))
-    screen.blit(score_text, (300, 230))
+    time_text = small_font.render(
+    f"Time: {round(elapsed_time, 1)}s", True, (0, 0, 0)) 
+    screen.blit(time_text, time_text.get_rect(center=(400, 230)))
 
     # restart instructions
     restart = small_font.render(
@@ -228,7 +252,28 @@ def draw_win_screen():
         True,
         (0, 0, 0)
     )
-    screen.blit(restart, (280, 300))
+    screen.blit(restart, restart.get_rect(center=(400, 280)))
+
+    #Leaderboard box
+    pygame.draw.rect(screen, (255, 255, 255), (250, 360, 300, 220))
+    pygame.draw.rect(screen, (0, 0, 0), (250, 360, 300, 220), 3)
+
+    #leaderbooard contents
+    title = small_font.render("Best Times:", True, (0, 0, 0))
+    screen.blit(title, title.get_rect(center=(400, 385)))
+
+    for i, t in enumerate(best_times):
+        text = small_font.render(f"{i+1}. {t}s", True, (0, 0, 0))
+        screen.blit(text, text.get_rect(center=(400, 425 + i * 30)))
+
+def save_time():
+    global best_times
+
+    finish_time = round(elapsed_time, 1)
+
+    best_times.append(finish_time)
+    best_times.sort()      
+    best_times = best_times[:5]
 
 
 # game loop runs while game is open
@@ -330,6 +375,7 @@ while running:
 
         # if you win
         if score >= 20:
+            save_time()
             pygame.mixer.music.stop()
             game_state = "win"
             
